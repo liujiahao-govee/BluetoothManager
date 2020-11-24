@@ -16,11 +16,13 @@
     "tag": "0.1.0"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "9.0"
   },
   "source_files": "BluetoothManager/Classes/**/*",
   "frameworks": [
     "UIKit",
     "CoreBluetooth"
-  ]
+  ],
+  "swift_versions": "5.0",
+  "swift_version": "5.0"
 }
