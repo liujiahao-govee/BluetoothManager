@@ -18,11 +18,10 @@ public final class BluetoothManager: NSObject {
     public init(delegate: BluetoothManagerDelegate, queue: DispatchQueue? = nil) {
         super.init()
         
-        self.delegate = delegate
-        centralManager = CBCentralManager(delegate: self, queue: queue)
+        addObservers()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
+        self.delegate = delegate
+        self.centralManager = CBCentralManager(delegate: self, queue: queue)
     }
     
     public private(set) var centralManager: CBCentralManager!
@@ -139,6 +138,11 @@ private extension BluetoothManager {
             }
         }
         return nil
+    }
+    
+    func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     @objc func didEnterBackground(_ noti: Notification) {

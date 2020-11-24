@@ -64,6 +64,10 @@ public protocol BluetoothManagerDelegate: NSObject {
 }
 
 public extension BluetoothManagerDelegate {
+    @available(iOS, introduced: 5.0, deprecated: 10.0, message: "Use CBManagerState instead")
+    func didUpdateState(state: CBCentralManagerState) {}
+    @available(iOS 10.0, *)
+    func didUpdateState(state: CBManagerState) {}
     func didDiscover(device: BluetoothDeviceModel, devices: [BluetoothDeviceModel]) {}
     func didConnect(device: BluetoothDeviceModel) {}
     func didFailToConnect(deviceName: String?, errorMsg: String?) {}

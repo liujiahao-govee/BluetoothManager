@@ -20,7 +20,6 @@
 		7601A7C04E940CCFFA204710B9770C4E /* BluetoothManager-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = D05661A756E07DFD27439A4CFDBDCB30 /* BluetoothManager-dummy.m */; };
 		77DC4B9EE4CFD18609BA09847A068840 /* Pods-BluetoothManager_Tests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 057EE2540C329FDC8F0E1E4F8876329C /* Pods-BluetoothManager_Tests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7A4350F6849DFCF3C717510CC72D4FF3 /* CBExtension+UuidStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45359713AA45A8B4B162B461C9340F06 /* CBExtension+UuidStrings.swift */; };
-		88A5035BE37F297F07E16378E1114017 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = D260F6A8F321E537B0DA08E52C70F422 /* WeakRef.swift */; };
 		8FB3C56D6C883112CC999CF34B8C6D01 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92775991FEEB96AA3B3C955AD791260 /* Data.swift */; };
 		A06AD81C67376F1215699235CAED7410 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D65EA472C08E60BFEC99DA355B8179D /* UIKit.framework */; };
 		A679B72ABFE72470D5068AF3C7D0CF11 /* BMError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E4754C7E7B91CA591D41B97E133B8B /* BMError.swift */; };
@@ -77,7 +76,6 @@
 		B023EA745173B67BC276F1E1ED08CE35 /* Pods-BluetoothManager_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-BluetoothManager_Example-umbrella.h"; sourceTree = "<group>"; };
 		CB59613EEE95DA488F6A03FF5825CEBD /* Pods-BluetoothManager_Tests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BluetoothManager_Tests-Info.plist"; sourceTree = "<group>"; };
 		D05661A756E07DFD27439A4CFDBDCB30 /* BluetoothManager-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "BluetoothManager-dummy.m"; sourceTree = "<group>"; };
-		D260F6A8F321E537B0DA08E52C70F422 /* WeakRef.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WeakRef.swift; path = BluetoothManager/Classes/WeakRef.swift; sourceTree = "<group>"; };
 		D619ACFCFCABBC795FDBADBF74676202 /* Pods_BluetoothManager_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BluetoothManager_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2EE66E70994A489BCEAECBF8118E705 /* Pods-BluetoothManager_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-BluetoothManager_Example-frameworks.sh"; sourceTree = "<group>"; };
 		E56D828E06DA8F139DA321661A016ECD /* BluetoothManager-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "BluetoothManager-Info.plist"; sourceTree = "<group>"; };
@@ -167,7 +165,6 @@
 				45359713AA45A8B4B162B461C9340F06 /* CBExtension+UuidStrings.swift */,
 				F92775991FEEB96AA3B3C955AD791260 /* Data.swift */,
 				F01B180D93842F24FD6D0460708C615F /* DeviceModel.swift */,
-				D260F6A8F321E537B0DA08E52C70F422 /* WeakRef.swift */,
 				9831587BB3BF157B02EBBC83E59B5EE2 /* Pod */,
 				0F779CA2D2E7EEC7A463A6197F53F830 /* Support Files */,
 			);
@@ -400,7 +397,6 @@
 				7A4350F6849DFCF3C717510CC72D4FF3 /* CBExtension+UuidStrings.swift in Sources */,
 				8FB3C56D6C883112CC999CF34B8C6D01 /* Data.swift in Sources */,
 				3EF98398FE2BCDA16A075564E80D37CC /* DeviceModel.swift in Sources */,
-				88A5035BE37F297F07E16378E1114017 /* WeakRef.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
