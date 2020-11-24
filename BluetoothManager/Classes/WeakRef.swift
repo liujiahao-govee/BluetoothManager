@@ -7,6 +7,8 @@
 
 import Foundation
 
+// TODO: 待移除
+
 public final class WeakRef<T> where T: AnyObject {
     
     private(set) weak var value: T?
