@@ -1,0 +1,16 @@
+PODS:
+  - BluetoothManager (0.1.0)
+
+DEPENDENCIES:
+  - BluetoothManager (from `../`)
+
+EXTERNAL SOURCES:
+  BluetoothManager:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  BluetoothManager: 0eef8f0d364e62c78306e13027021b97934bfbd3
+
+PODFILE CHECKSUM: 1e25116304ab1c4bd54fc8097c8f211c0eb3f2b2
+
+COCOAPODS: 1.9.3

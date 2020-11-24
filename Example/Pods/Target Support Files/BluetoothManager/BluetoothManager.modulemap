@@ -1,0 +1,6 @@
+framework module BluetoothManager {
+  umbrella header "BluetoothManager-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "BluetoothManager",
+  "version": "0.1.0",
+  "summary": "A short description of BluetoothManager.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/liujiahao-govee/BluetoothManager",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "liujiahao-govee": "jiahao.liu@ihoment.com"
+  },
+  "source": {
+    "git": "https://github.com/liujiahao-govee/BluetoothManager.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "BluetoothManager/Classes/**/*"
+}
