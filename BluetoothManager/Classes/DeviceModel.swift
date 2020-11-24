@@ -18,22 +18,22 @@ public class BluetoothDeviceModel {
     /// 考虑下，如何嵌套业务数据，比如SKU，等等，一些用户自定义参数
     /// 可以用一个模型来包含这个模型，然后就可以在外部随意添加了，是个方法。
     
-    let peripheral: CBPeripheral
-    var advertisementData: [String : Any]
-    var rssi: Int
+    public let peripheral: CBPeripheral
+    public var advertisementData: [String : Any]
+    public var rssi: Int
     
-    init(peripheral: CBPeripheral, advertisementData: [String : Any], rssi: Int) {
+    public init(peripheral: CBPeripheral, advertisementData: [String : Any], rssi: Int) {
         self.peripheral = peripheral
         self.advertisementData = advertisementData
         self.rssi = rssi
     }
     
     /// 服务: [特征]
-    var serviceCharacteristics: ServiceCharacteristicsDict = ServiceCharacteristicsDict()
+    public var serviceCharacteristics: ServiceCharacteristicsDict = ServiceCharacteristicsDict()
     /// 需要通知的特征
-    var notifyCharacteristics: Set<String> = []
+    public var notifyCharacteristics: Set<String> = []
     /// 发现的特征
-    var disCoveredCharacteristics: Set<CBCharacteristic> = []
+    public var disCoveredCharacteristics: Set<CBCharacteristic> = []
 }
 
 public extension BluetoothDeviceModel {
