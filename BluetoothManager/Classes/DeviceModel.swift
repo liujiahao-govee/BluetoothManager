@@ -95,6 +95,6 @@ extension BluetoothDeviceModel: Equatable {
 extension BluetoothDeviceModel: CustomDebugStringConvertible {
     
     public var debugDescription: String {
-        return (name ?? "nil") + "\(advertisementData)" + "\(rssi)"
+        return (name ?? "unknown")
     }
 }

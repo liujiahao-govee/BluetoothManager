@@ -10,6 +10,13 @@ import Foundation
 /// 用了这个，那么这个库暂时不考虑兼容OC
 /// 如果后面需要改，那么要把BMError，继承NSError，然后errorCode是NSEnum，这样便可兼容
 
+/// 错误消息没有适配多语言
+public struct BMErrorMsg {
+    static var didDiscoverServicesFailed = ""
+    static var didDiscoverCharacteristicsFailed = ""
+    static var didUpdateValueFailed = ""
+}
+
 public enum BMError: Error {
     /// 发现服务报错
     case didDiscoverServicesFailed(_ device: BluetoothDeviceModel, error: Error)

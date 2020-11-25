@@ -9,8 +9,6 @@ import Foundation
 import UIKit
 import CoreBluetooth
 
-// TODO: 为设备添加心跳
-
 // MARK: - BluetoothManager
 
 public final class BluetoothManager: NSObject {
