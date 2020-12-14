@@ -12,25 +12,35 @@ typealias HeartbeatDict = [String: Data]
 
 class Heartbeat {
     
-    init(_ manager: BluetoothManager) {
-        self.manager = manager
-    }
-    
-    unowned let manager: BluetoothManager
+    weak var manager: BluetoothManager?
     
     var timer: Timer?
     
     var timeInterval: TimeInterval = 2
+    
+    init(_ manager: BluetoothManager) {
+        self.manager = manager
+    }
 }
 
 extension Heartbeat {
     
     func fire() {
-//        RunLoop.current.add(Timer(), forMode: .common)
+        self.timer?.invalidate()
+        let timer = Timer(timeInterval: timeInterval, target: self, selector: #selector(beat), userInfo: nil, repeats: true)
+        RunLoop.current.add(timer, forMode: .common)
+        self.timer = timer
+    }
+    
+    func done() {
+        self.timer?.invalidate()
+        self.timer = nil
     }
 }
 
 private extension Heartbeat {
     
-    
+    @objc func beat() {
+        /// write data
+    }
 }

@@ -1,14 +1,12 @@
 //
 //  BluetoothManagerDelegate.swift
-//  TestBluetoothKit
+//  BluetoothManager
 //
 //  Created by 刘嘉豪 on 2020/11/16.
 //
 
 import Foundation
 import CoreBluetooth
-
-// MARK: - BluetoothManagerDelegate
 
 public protocol BluetoothManagerDelegate: NSObject {
     

@@ -1,6 +1,6 @@
 //
 //  Enum.swift
-//  TestBluetoothKit
+//  BluetoothManager
 //
 //  Created by 刘嘉豪 on 2020/11/14.
 //

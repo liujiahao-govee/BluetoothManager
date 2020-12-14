@@ -1,30 +1,20 @@
 //
 //  BluetoothManager.swift
-//  TestBluetoothKit
+//  BluetoothManager
 //
 //  Created by 刘嘉豪 on 2020/11/14.
 //
 
 import Foundation
-import UIKit
 import CoreBluetooth
 
 // MARK: - BluetoothManager
 
 public final class BluetoothManager: NSObject {
-    
-    public init(delegate: BluetoothManagerDelegate, queue: DispatchQueue? = nil) {
-        super.init()
-        
-        addObservers()
-        
-        self.delegate = delegate
-        self.centralManager = CBCentralManager(delegate: self, queue: queue)
-    }
+            
+    public private(set) weak var delegate: BluetoothManagerDelegate?
     
     public private(set) var centralManager: CBCentralManager!
-    
-    public private(set) weak var delegate: BluetoothManagerDelegate?
     
     /// 被发现的外设
     public private(set) var discoveredDevices: [BluetoothDeviceModel] = []
@@ -40,6 +30,15 @@ public final class BluetoothManager: NSObject {
     private var scanOptions: [String : Any]?
     /// 后台进入前台是否需要恢复扫描
     private var needRecoverScan = false
+    
+    public init(delegate: BluetoothManagerDelegate, queue: DispatchQueue? = nil) {
+        super.init()
+        
+        addObservers()
+        
+        self.delegate = delegate
+        self.centralManager = CBCentralManager(delegate: self, queue: queue)
+    }
 }
 
 // MARK: - Interface
@@ -131,7 +130,7 @@ private extension BluetoothManager {
     
     func matchDevice(_ peripheral: CBPeripheral, in deivces: [BluetoothDeviceModel]) -> BluetoothDeviceModel? {
         for deivce in deivces {
-            if deivce.isEqual(by: peripheral) {
+            if deivce.isEqual(peripheral) {
                 return deivce
             }
         }
@@ -221,7 +220,7 @@ extension BluetoothManager: CBPeripheralDelegate {
         guard let device = matchDevice(peripheral, in: connectedDevices) else { return }
         
         guard error == nil else {
-            delegate?.didCatchError(.didDiscoverServicesFailed(device, error: error!))
+            delegate?.didCatchError(.didDiscoverServicesFailed(device, errorMsg: BMErrorMsg.didDiscoverServicesFailed ?? error?.localizedDescription))
             return
         }
         
@@ -229,7 +228,7 @@ extension BluetoothManager: CBPeripheralDelegate {
         
         let serviceUuids = Set(services.map { $0.uuidString })
         guard device.services.isSubset(of: serviceUuids) else {
-            delegate?.didCatchError(.didDiscoverServicesFailed(device, error: "服务匹配失败"))
+            delegate?.didCatchError(.didDiscoverServicesFailed(device, errorMsg: BMErrorMsg.didDiscoverServicesFailed ?? "服务匹配失败"))
             return
         }
         
@@ -245,7 +244,9 @@ extension BluetoothManager: CBPeripheralDelegate {
         guard let device = matchDevice(peripheral, in: connectedDevices) else { return }
         
         guard error == nil else {
-            delegate?.didCatchError(.didDiscoverCharacteristicsFailed(device, service: service.uuidString, error: error!))
+            delegate?.didCatchError(.didDiscoverCharacteristicsFailed(device,
+                                                                      service: service.uuidString,
+                                                                      errorMsg: BMErrorMsg.didDiscoverCharacteristicsFailed ?? error?.localizedDescription))
             return
         }
         
@@ -256,7 +257,9 @@ extension BluetoothManager: CBPeripheralDelegate {
         let uuids = Set(chars.map { $0.uuidString })
         guard let deviceChars = device.serviceCharacteristics[service.uuidString],
               Set(deviceChars).isSubset(of: uuids) else {
-            delegate?.didCatchError(.didDiscoverCharacteristicsFailed(device, service: service.uuidString, error: "特征匹配失败"))
+            delegate?.didCatchError(.didDiscoverCharacteristicsFailed(device,
+                                                                      service: service.uuidString,
+                                                                      errorMsg: BMErrorMsg.didDiscoverCharacteristicsFailed ?? "特征匹配失败"))
             return
         }
         
@@ -276,7 +279,9 @@ extension BluetoothManager: CBPeripheralDelegate {
         guard let device = matchDevice(peripheral, in: connectedDevices) else { return }
         
         guard error == nil else {
-            delegate?.didCatchError(.didUpdateValueFailed(device, characteristic: characteristic.uuidString, error: error!))
+            delegate?.didCatchError(.didUpdateValueFailed(device,
+                                                          characteristic: characteristic.uuidString,
+                                                          errorMsg: BMErrorMsg.didUpdateValueFailed ?? error?.localizedDescription))
             return
         }
         
