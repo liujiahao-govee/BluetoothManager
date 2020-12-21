@@ -15,12 +15,12 @@ class DiscoverDeviceCell: UITableViewCell {
     @IBOutlet weak var dataLabel: UILabel!
     @IBOutlet weak var rssiLabel: UILabel!
     
-    var device: BluetoothDeviceModel! {
+    var device: DeviceModel! {
         didSet {
-            nameLabel.text = device.name ?? "nil"
-            dataLabel.text = "\(device.advertisementData)"
-            rssiLabel.text = "\(device.rssi)"
-            uuidLabel.text = device.uuid
+            nameLabel.text = device.name
+            dataLabel.text = "\(device.underlyingDevice?.advertisementData)"
+            rssiLabel.text = "\(device.underlyingDevice?.rssi)"
+            uuidLabel.text = device.underlyingDevice?.uuid
         }
     }
     

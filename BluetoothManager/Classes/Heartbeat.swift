@@ -6,29 +6,31 @@
 //
 
 import Foundation
+import CoreBluetooth
 
-/// 心跳表[设备类型唯一标识: 心跳数据]
-typealias HeartbeatDict = [String: Data]
-
-class Heartbeat {
+public final class Heartbeat {
     
-    weak var manager: BluetoothManager?
+    public weak var manager: BluetoothManager?
     
-    var timer: Timer?
+    private var timer: Timer?
     
-    var timeInterval: TimeInterval = 2
+    private let timeInterval: TimeInterval = 2
     
-    init(_ manager: BluetoothManager) {
+    var devices: [BluetoothDeviceProtocol]
+    
+    public init(_ manager: BluetoothManager, devices: [BluetoothDeviceProtocol]) {
         self.manager = manager
+        self.devices = devices
     }
 }
 
-extension Heartbeat {
+public extension Heartbeat {
     
     func fire() {
         self.timer?.invalidate()
         let timer = Timer(timeInterval: timeInterval, target: self, selector: #selector(beat), userInfo: nil, repeats: true)
         RunLoop.current.add(timer, forMode: .common)
+        timer.fire()
         self.timer = timer
     }
     
@@ -41,6 +43,14 @@ extension Heartbeat {
 private extension Heartbeat {
     
     @objc func beat() {
-        /// write data
+        let tuples: [WriteableDataTuple] = devices.compactMap { (device) -> WriteableDataTuple? in
+            guard let data = device.heartbeatData else {
+                return nil
+            }
+            return WriteableDataTuple(device, device.uuidTuple.write, data)
+        }
+        
+        manager?.writeDatas(tuples)
+        manager?.readRSSI(devices: devices)
     }
 }

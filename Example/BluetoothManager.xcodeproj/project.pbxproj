@@ -12,6 +12,7 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
+		91232BCD258C89C3008C18C7 /* DeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91232BCC258C89C3008C18C7 /* DeviceModel.swift */; };
 		91696A79256D151B009BB378 /* DiscoverDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91696A76256D151A009BB378 /* DiscoverDeviceCell.xib */; };
 		91696A7A256D151B009BB378 /* Enum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91696A77256D151A009BB378 /* Enum.swift */; };
 		91696A7B256D151B009BB378 /* DiscoverDeviceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91696A78256D151A009BB378 /* DiscoverDeviceCell.swift */; };
@@ -35,6 +36,7 @@
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		8737A9A6AD15DFD49B02E7D7 /* Pods_BluetoothManager_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BluetoothManager_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D6B066A271E647666F0C277 /* Pods-BluetoothManager_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BluetoothManager_Tests.release.xcconfig"; path = "Target Support Files/Pods-BluetoothManager_Tests/Pods-BluetoothManager_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		91232BCC258C89C3008C18C7 /* DeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceModel.swift; sourceTree = "<group>"; };
 		91696A76256D151A009BB378 /* DiscoverDeviceCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DiscoverDeviceCell.xib; sourceTree = "<group>"; };
 		91696A77256D151A009BB378 /* Enum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enum.swift; sourceTree = "<group>"; };
 		91696A78256D151A009BB378 /* DiscoverDeviceCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiscoverDeviceCell.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 				91696A76256D151A009BB378 /* DiscoverDeviceCell.xib */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				91696A77256D151A009BB378 /* Enum.swift */,
+				91232BCC258C89C3008C18C7 /* DeviceModel.swift */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
 			name = "Example for BluetoothManager";
@@ -272,6 +275,7 @@
 			files = (
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
+				91232BCD258C89C3008C18C7 /* DeviceModel.swift in Sources */,
 				91696A7B256D151B009BB378 /* DiscoverDeviceCell.swift in Sources */,
 				91696A7A256D151B009BB378 /* Enum.swift in Sources */,
 			);

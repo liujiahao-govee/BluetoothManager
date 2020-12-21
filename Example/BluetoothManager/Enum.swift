@@ -7,7 +7,11 @@
 
 import Foundation
 
-enum CommandEnum {
+protocol CommandData {
+    var data: Data { get }
+}
+
+enum CommandEnum: CommandData {
     
     typealias Read = ReadEnum
     typealias Write = WriteEnum
@@ -34,10 +38,9 @@ enum CommandEnum {
 
 protocol CommandByte {
     static var prefix: UInt8 { get }
-    var byte: UInt8 { get }
 }
 
-enum ReadEnum: UInt8 {
+enum ReadEnum: UInt8, CommandByte {
     case on = 0x01
     case brightness = 0x04
     case mode = 0x05
@@ -58,7 +61,7 @@ enum ReadEnum: UInt8 {
     static var prefix: UInt8 { 0xaa }
 }
 
-enum WriteEnum: UInt8 {
+enum WriteEnum: UInt8, CommandByte {
     case on = 0x01
     case brightness = 0x04
     case mode = 0x05

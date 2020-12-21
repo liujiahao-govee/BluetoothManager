@@ -11,19 +11,18 @@ import CoreBluetooth
 // MARK: - BluetoothManager
 
 public final class BluetoothManager: NSObject {
-            
+    
     public private(set) weak var delegate: BluetoothManagerDelegate?
     
     public private(set) var centralManager: CBCentralManager!
-    
     /// 被发现的外设
     public private(set) var discoveredDevices: [BluetoothDeviceModel] = []
-    
     /// 已连接的外设
     public private(set) var connectedDevices: [BluetoothDeviceModel] = []
-    
+    /// 根据外设名来过滤
+    public typealias ScanFilter = ((String?) -> Bool)
     /// 外设名称过滤条件
-    private var scanFilter: ((String?) -> Bool)?
+    private var scanFilter: ScanFilter?
     /// 扫描的服务uuid
     private var scanServiceUUIDs: [CBUUID]?
     /// 扫描的附加参数
@@ -50,11 +49,12 @@ public extension BluetoothManager {
     ///   - serviceUUIDs: 服务uuid
     ///   - options: 扫描配置
     ///   - filter: 过滤条件
-    func startScan(withServices serviceUUIDs: [CBUUID]? = nil, options: [String : Any]? = nil, filter: ((String?) -> Bool)? = nil) {
+    func startScan(withServices serviceUUIDs: [CBUUID]? = nil, options: [String : Any]? = nil, filter: ScanFilter? = nil) {
         scanServiceUUIDs = serviceUUIDs
         scanOptions = options
         scanFilter = filter
         
+        stopScan()
         centralManager.scanForPeripherals(withServices: serviceUUIDs, options: options)
     }
     
@@ -63,10 +63,10 @@ public extension BluetoothManager {
     ///   - serviceUUIDs: 服务uuid
     ///   - options: 扫描配置
     ///   - filter: 过滤条件
-    /// - 清空当前发现和连接的设备（是否清空当前连接的设备待考虑）
+    /// - 清空当前发现的设备
     func reScan(withServices serviceUUIDs: [CBUUID]? = nil, options: [String : Any]? = nil, filter: ((String?) -> Bool)? = nil) {
+        /// 取消连接、停止心跳
         discoveredDevices = []
-        connectedDevices = []
         
         startScan(withServices: serviceUUIDs, options: options, filter: filter)
     }
@@ -79,29 +79,25 @@ public extension BluetoothManager {
     }
     
     /// 连接外设
-    func connect(device: BluetoothDeviceModel, options: [String: Any]? = nil) {
-        centralManager.connect(device.peripheral, options: options)
+    func connect(device: BluetoothDeviceProtocol, options: [String: Any]? = nil) {
+        guard let underlyingDevice = device.underlyingDevice else { return }
+        underlyingDevice.services = device.services
+        underlyingDevice.characteristics = device.characteristics
+        underlyingDevice.notifyCharacteristics = device.notifyCharacteristics
+        underlyingDevice.serviceCharacteristics = device.serviceCharacteristics
+        
+        centralManager.connect(underlyingDevice.peripheral, options: options)
     }
     
     /// 断连外设
-    func disconnnect(device: BluetoothDeviceModel) {
+    func disconnnect(device: BluetoothDeviceProtocol) {
+        guard let device = device.underlyingDevice else { return }
         centralManager.cancelPeripheralConnection(device.peripheral)
     }
     
-    /// 发现服务和特征并设置特征通知
-    /// - Parameters:
-    ///   - device: 外设
-    ///   - serviceCharacteristics: 服务和特征
-    ///   - notityCharacteristics: 需通知的特征
-    func discover(device: BluetoothDeviceModel,
-                  serviceCharacteristics: ServiceCharacteristicsDict,
-                  notityCharacteristics: Set<String>? = nil) {
-        
-        device.serviceCharacteristics = serviceCharacteristics
-        device.notifyCharacteristics = notityCharacteristics ?? device.characteristics
-        
-        let uuids = device.services.map { CBUUID(string: $0) }
-        device.peripheral.discoverServices(uuids)
+    /// 断开全部连接
+    func disconnectAll() {
+        connectedDevices.forEach { self.centralManager.cancelPeripheralConnection($0.peripheral) }
     }
     
     /// 写入数据
@@ -109,7 +105,7 @@ public extension BluetoothManager {
     ///   - tuple: (外设, 特征, 数据)
     ///   - type: 写入类型
     func writeData(_ tuple: WriteableDataTuple, type: CBCharacteristicWriteType = .withoutResponse) {
-        let device = tuple.device
+        guard let device = tuple.device.underlyingDevice else { return }
         let uuid = tuple.characteristic
         let data = tuple.data
         guard let char = device.getDisCoveredCharacteristic(uuid) else { return }
@@ -119,22 +115,44 @@ public extension BluetoothManager {
     
     /// 批量写入数据
     /// - Parameters:
-    ///   - datas: [(外设, 特征, 数据)]]
+    ///   - tuples: [(外设, 特征, 数据)]]
     ///   - type: 写入类型
-    func writeDatas(_ datas: [WriteableDataTuple], type: CBCharacteristicWriteType = .withoutResponse) {
-        datas.forEach { writeData($0, type: type) }
+    func writeDatas(_ tuples: [WriteableDataTuple], type: CBCharacteristicWriteType = .withoutResponse) {
+        tuples.forEach { writeData($0, type: type) }
+    }
+    
+    /// 读取设备信号强度
+    func readRSSI(device: BluetoothDeviceProtocol) {
+        guard let underlyingDevice = device.underlyingDevice else { return }
+        underlyingDevice.peripheral.readRSSI()
+    }
+    
+    /// 批量读取设备信号强度
+    func readRSSI(devices: [BluetoothDeviceProtocol]) {
+        devices.forEach { self.readRSSI(device: $0) }
+    }
+    
+    /// 查看设备是否已连接
+    func getDeviceIsConnected(_ device: BluetoothDeviceModel) -> Bool {
+        connectedDevices.contains(device)
     }
 }
 
 private extension BluetoothManager {
     
-    func matchDevice(_ peripheral: CBPeripheral, in deivces: [BluetoothDeviceModel]) -> BluetoothDeviceModel? {
-        for deivce in deivces {
-            if deivce.isEqual(peripheral) {
-                return deivce
+    func matchDevice(_ peripheral: CBPeripheral, in devices: [BluetoothDeviceModel]) -> BluetoothDeviceModel? {
+        for device in devices {
+            if device.isEqual(peripheral) {
+                return device
             }
         }
         return nil
+    }
+    
+    /// 连接成功后即发现服务和特征并设置特征通知
+    func discover(device: BluetoothDeviceModel) {
+        let uuids = device.services.map { CBUUID(string: $0) }
+        device.peripheral.discoverServices(uuids)
     }
     
     func addObservers() {
@@ -174,8 +192,9 @@ extension BluetoothManager: CBCentralManagerDelegate {
         
         guard scanFilter?(peripheral.name) ?? true else { return }
         
-        if let matched = matchDevice(peripheral, in: discoveredDevices) {
-            matched.update(advertisementData: advertisementData, rssi: Int(truncating: RSSI))
+        if let device = matchDevice(peripheral, in: discoveredDevices) {
+            device.update(advertisementData: advertisementData, rssi: Int(truncating: RSSI))
+            delegate?.didUpdateDevice(device)
             return
         }
         
@@ -195,6 +214,8 @@ extension BluetoothManager: CBCentralManagerDelegate {
         connectedDevices.append(device)
         
         delegate?.didConnect(device: device)
+        
+        discover(device: device)
     }
     
     public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -220,7 +241,7 @@ extension BluetoothManager: CBPeripheralDelegate {
         guard let device = matchDevice(peripheral, in: connectedDevices) else { return }
         
         guard error == nil else {
-            delegate?.didCatchError(.didDiscoverServicesFailed(device, errorMsg: BMErrorMsg.didDiscoverServicesFailed ?? error?.localizedDescription))
+            delegate?.didCatchError(.didDiscoverServicesError(device, errorMsg: BMErrorMsg.didDiscoverServicesError ?? error?.localizedDescription))
             return
         }
         
@@ -228,7 +249,7 @@ extension BluetoothManager: CBPeripheralDelegate {
         
         let serviceUuids = Set(services.map { $0.uuidString })
         guard device.services.isSubset(of: serviceUuids) else {
-            delegate?.didCatchError(.didDiscoverServicesFailed(device, errorMsg: BMErrorMsg.didDiscoverServicesFailed ?? "服务匹配失败"))
+            delegate?.didCatchError(.didDiscoverServicesError(device, errorMsg: BMErrorMsg.didDiscoverServicesError ?? "服务匹配失败"))
             return
         }
         
@@ -244,9 +265,9 @@ extension BluetoothManager: CBPeripheralDelegate {
         guard let device = matchDevice(peripheral, in: connectedDevices) else { return }
         
         guard error == nil else {
-            delegate?.didCatchError(.didDiscoverCharacteristicsFailed(device,
+            delegate?.didCatchError(.didDiscoverCharacteristicsError(device,
                                                                       service: service.uuidString,
-                                                                      errorMsg: BMErrorMsg.didDiscoverCharacteristicsFailed ?? error?.localizedDescription))
+                                                                      errorMsg: BMErrorMsg.didDiscoverCharacteristicsError ?? error?.localizedDescription))
             return
         }
         
@@ -257,9 +278,9 @@ extension BluetoothManager: CBPeripheralDelegate {
         let uuids = Set(chars.map { $0.uuidString })
         guard let deviceChars = device.serviceCharacteristics[service.uuidString],
               Set(deviceChars).isSubset(of: uuids) else {
-            delegate?.didCatchError(.didDiscoverCharacteristicsFailed(device,
+            delegate?.didCatchError(.didDiscoverCharacteristicsError(device,
                                                                       service: service.uuidString,
-                                                                      errorMsg: BMErrorMsg.didDiscoverCharacteristicsFailed ?? "特征匹配失败"))
+                                                                      errorMsg: BMErrorMsg.didDiscoverCharacteristicsError ?? "特征匹配失败"))
             return
         }
         
@@ -279,14 +300,28 @@ extension BluetoothManager: CBPeripheralDelegate {
         guard let device = matchDevice(peripheral, in: connectedDevices) else { return }
         
         guard error == nil else {
-            delegate?.didCatchError(.didUpdateValueFailed(device,
+            delegate?.didCatchError(.didUpdateValueError(device,
                                                           characteristic: characteristic.uuidString,
-                                                          errorMsg: BMErrorMsg.didUpdateValueFailed ?? error?.localizedDescription))
+                                                          errorMsg: BMErrorMsg.didUpdateValueError ?? error?.localizedDescription))
             return
         }
         
         guard let data = characteristic.value else { return }
         
         delegate?.didUpdateValue(device: device, characteristic: characteristic.uuidString, data: data)
+    }
+    
+    public func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
+        
+        guard let device = matchDevice(peripheral, in: connectedDevices) else { return }
+        
+        guard error == nil else {
+            delegate?.didCatchError(.didReadRSSIError(device, errorMsg: BMErrorMsg.didReadRSSIError ?? error?.localizedDescription))
+            return
+        }
+        
+        device.update(rssi: Int(truncating: RSSI))
+        
+        delegate?.didUpdateDevice(device)
     }
 }

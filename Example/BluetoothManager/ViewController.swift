@@ -38,20 +38,14 @@ class ViewController: UIViewController {
         slider.maximumValue = 254
         return slider
     }()
-        
-    var timer: Timer?
-            
-    var serviceUuid: String { "00010203-0405-0607-0809-0A0B0C0D1910" }
-    var notifyUuid: String { "00010203-0405-0607-0809-0A0B0C0D2B10" }
-    var writeUuid: String { "00010203-0405-0607-0809-0A0B0C0D2B11" }
-        
+                
     var bluetoothManager: BluetoothManager!
     
-    var discoveredDevices: [BluetoothDeviceModel] {
-        bluetoothManager.discoveredDevices
-    }
+    var deviceModels: [DeviceModel] = [DeviceModel(name: "ihoment_H6005_556C"), DeviceModel(name: "2"), DeviceModel(name: "3")]
     
-    weak var connectedDevice: BluetoothDeviceModel?
+    weak var connectedDevice: DeviceModel?
+    
+    var hearbeat: Heartbeat?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,6 +71,9 @@ extension ViewController: BluetoothManagerDelegate {
     func didDiscover(device: BluetoothDeviceModel, devices: [BluetoothDeviceModel]) {
         
         print(#function, device, devices.count)
+        
+        guard let model = deviceModels.filter({ $0.name == device.name }).first else { return }
+        model.underlyingDevice = device
                 
         tableView.reloadData()
     }
@@ -84,10 +81,6 @@ extension ViewController: BluetoothManagerDelegate {
     func didConnect(device: BluetoothDeviceModel) {
         
         print(#function, device)
-        
-        bluetoothManager.discover(device: device,
-                                  serviceCharacteristics: [serviceUuid: [notifyUuid, writeUuid]],
-                                  notityCharacteristics: [notifyUuid])
     }
     
     func didFailToConnect(deviceName: String?, errorMsg: String?) {
@@ -107,14 +100,17 @@ extension ViewController: BluetoothManagerDelegate {
     func didReady(device: BluetoothDeviceModel) {
         print(#function, device)
         
+        guard let device = deviceModels.filter({ $0.name == device.name }).first else { return }
         connectedDevice = device
         
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(heartBeat), userInfo: nil, repeats: true)
+        hearbeat = Heartbeat(bluetoothManager, devices: [device])
+        hearbeat!.fire()
     }
     
     func didUpdateValue(device: BluetoothDeviceModel, characteristic: String, data: Data) {
         print(#function, device, characteristic, NSData(data: data))
+        
+        guard let device = deviceModels.filter({ $0.name == device.name }).first else { return }
         
         guard data.check() else {
             return
@@ -124,7 +120,7 @@ extension ViewController: BluetoothManagerDelegate {
         let byte1: UInt8 = data[1]
         let byte2: UInt8 = data[2]
         
-        if characteristic == notifyUuid {
+        if characteristic == device.uuidTuple.read {
             if prefix == ReadEnum.prefix {
                 guard let read = ReadEnum(rawValue: byte1) else { return }
                 switch read {
@@ -157,7 +153,7 @@ extension ViewController {
         
         print(#function, NSData(data: getOn), NSData(data: getBri))
         
-        bluetoothManager.writeDatas([(device, writeUuid, getOn), (device, writeUuid, getBri)])
+        bluetoothManager.writeDatas([(device, device.uuidTuple.write, getOn), (device, device.uuidTuple.write, getBri)])
     }
     
     @objc func changeSwitch(_ sender: UISwitch) {
@@ -169,7 +165,7 @@ extension ViewController {
         
         print(#function, NSData(data: data))
         
-        bluetoothManager.writeData((device, writeUuid, data))
+        bluetoothManager.writeData((device, device.uuidTuple.write, data))
     }
     
     @objc func briSliderValueChanged(_ sender: UISlider) {
@@ -181,19 +177,19 @@ extension ViewController {
         
         print(#function, NSData(data: data))
         
-        bluetoothManager.writeData((device, writeUuid, data))
+        bluetoothManager.writeData((device, device.uuidTuple.write, data))
     }
 }
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return discoveredDevices.count
+        return deviceModels.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! DiscoverDeviceCell
-        let device = discoveredDevices[indexPath.row]
+        let device = deviceModels[indexPath.row]
         cell.device = device
         return cell
     }
@@ -201,10 +197,8 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        let device = discoveredDevices[indexPath.row]
-        
-        print(device)
-        
+        let device = deviceModels[indexPath.row]
+                
         bluetoothManager.connect(device: device)
     }
 }

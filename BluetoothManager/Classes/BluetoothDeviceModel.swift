@@ -5,18 +5,8 @@
 //  Created by 刘嘉豪 on 2020/11/14.
 //
 
-/// 考虑下，如何嵌套业务数据，比如SKU，等等，一些用户自定义参数
-/// 可以用一个模型来包含这个模型，然后就可以在外部随意添加了，是个方法。
-/// 继承这个类
-/// 把这个类，抽象成协议，但是会遇到BluetoothManagerDelegate嵌套的问题
-
 import Foundation
 import CoreBluetooth
-
-/// [服务: [特征]]
-public typealias ServiceCharacteristicsDict = [String: [String]]
-/// (外设, 特征, 数据)
-public typealias WriteableDataTuple = (device: BluetoothDeviceModel, characteristic: String, data: Data)
 
 open class BluetoothDeviceModel {
     
@@ -26,13 +16,17 @@ open class BluetoothDeviceModel {
     public var advertisementData: [String : Any]
     /// 信号强度
     public var rssi: Int
+    /// 发现的特征
+    public var disCoveredCharacteristics: Set<CBCharacteristic> = []
+    /// 服务
+    public var services: Set<String> = []
+    /// 特征
+    public var characteristics: Set<String> = []
     /// 服务: [特征]
     public var serviceCharacteristics: ServiceCharacteristicsDict = ServiceCharacteristicsDict()
     /// 需要通知的特征
     public var notifyCharacteristics: Set<String> = []
-    /// 发现的特征
-    public var disCoveredCharacteristics: Set<CBCharacteristic> = []
-    
+        
     public init(peripheral: CBPeripheral, advertisementData: [String : Any], rssi: Int) {
         self.peripheral = peripheral
         self.advertisementData = advertisementData
@@ -42,21 +36,11 @@ open class BluetoothDeviceModel {
 
 public extension BluetoothDeviceModel {
     
-    /// 外设名
+    /// 外设名（如果没有，可以考虑从广播字段中读）
     var name: String? { peripheral.name }
     
     /// 外设uuid
     var uuid: String { peripheral.uuidString }
-    
-    /// 外设服务
-    var services: Set<String> {
-        Set(serviceCharacteristics.keys.map { $0.description })
-    }
-    
-    /// 外设特征
-    var characteristics: Set<String> {
-        Set(serviceCharacteristics.values.flatMap { $0 })
-    }
     
     /// 外设是否准备完毕（服务和特征都已匹配）
     var isReady: Bool {
@@ -79,13 +63,13 @@ public extension BluetoothDeviceModel {
     /// - Parameters:
     ///   - advertisementData: 广播数据
     ///   - rssi: 信号强度
-    func update(advertisementData: [String : Any], rssi: Int) {
-        self.advertisementData = advertisementData
+    func update(advertisementData: [String : Any]? = nil, rssi: Int) {
+        self.advertisementData = advertisementData ?? self.advertisementData
         self.rssi = rssi
     }
 }
 
-extension BluetoothDeviceModel: Equatable {
+extension BluetoothDeviceModel: Equatable, Hashable {
     
     public static func == (lhs: BluetoothDeviceModel, rhs: BluetoothDeviceModel) -> Bool {
         lhs.peripheral.identifier == rhs.peripheral.identifier
@@ -103,6 +87,10 @@ extension BluetoothDeviceModel: Equatable {
         } else {
             return false
         }
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(peripheral.identifier)
     }
 }
 
