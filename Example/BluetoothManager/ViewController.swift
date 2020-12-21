@@ -20,7 +20,7 @@ class ViewController: UIViewController {
         table.delegate = self
         table.register(UINib(nibName: cellId, bundle: nil), forCellReuseIdentifier: cellId)
         table.estimatedRowHeight = 60
-        table.rowHeight = UITableViewAutomaticDimension
+        table.rowHeight = UITableView.automaticDimension
         return table
     }()
     

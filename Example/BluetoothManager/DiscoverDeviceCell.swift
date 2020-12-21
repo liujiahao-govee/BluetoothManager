@@ -18,8 +18,8 @@ class DiscoverDeviceCell: UITableViewCell {
     var device: DeviceModel! {
         didSet {
             nameLabel.text = device.name
-            dataLabel.text = "\(device.underlyingDevice?.advertisementData)"
-            rssiLabel.text = "\(device.underlyingDevice?.rssi)"
+            dataLabel.text = "\(String(describing: device.underlyingDevice?.advertisementData))"
+            rssiLabel.text = "\(String(describing: device.underlyingDevice?.rssi))"
             uuidLabel.text = device.underlyingDevice?.uuid
         }
     }
