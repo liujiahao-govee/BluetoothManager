@@ -11,9 +11,9 @@ import CoreBluetooth
 // MARK: - BluetoothManager
 
 public final class BluetoothManager: NSObject {
-    
+    /// 为外部提供回调代理对象
     public private(set) weak var delegate: BluetoothManagerDelegate?
-    
+    /// 内部处理中央管理对象
     public private(set) var centralManager: CBCentralManager!
     /// 被发现的外设
     public private(set) var discoveredDevices: [BluetoothDeviceModel] = []

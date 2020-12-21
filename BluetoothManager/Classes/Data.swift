@@ -13,42 +13,48 @@ extension Data {
     
     /// 数据包
     /// - Parameters:
-    ///   - hexs: 0x00, 0x01, 0x02...
+    ///   - bytes: 0x00, 0x01, 0x02...
     ///   - length: 包长度，自动补0
-    public init(_ hexs: Byte..., fill length: Int = 20) {
-        self.init()
-        hexs.forEach { self.append($0) }
-        self.fill(length)
+    ///   - rule: 校验规则
+    public init(_ bytes: Byte..., fill length: Int = 20, check rule: CheckRule = .crc) {
+        assert(bytes.count < length, "init data error: bytes.count must < length")
+        self.init(repeating: 0, count: length)
+        for (index, byte) in bytes.enumerated() {
+            self[index] = byte
+        }
+        self[length - 1] = rule.check(self)
     }
     
     /// 检查数据包
     /// - Parameter lenght: 包长度
+    /// - Parameter rule: 校验规则
     /// - Returns: 是否有效
-    public func check(_ lenght: Int = 20) -> Bool {
+    public func check(_ lenght: Int = 20, check rule: CheckRule = .crc) -> Bool {
         guard count == lenght else {
             return false
         }
         let temp = prefix(lenght - 1)
-        return temp.checked == self.last
+        return rule.check(temp) == self.last
     }
     
-    mutating func fill(_ length: Int = 20) {
-        let remain = length - 1 - count
-        if remain > 0 {
-            append(Data(repeating: 0, count: remain))
-        }
-        append(checked)
-    }
-    
-    var checked: Byte {
-        var c: Byte = 0
-        for (i, n) in enumerated() {
-            if i == 0 {
-                c = Byte(n)
-            } else {
-                c ^= Byte(n)
+    /// 校验规则
+    public enum CheckRule {
+        
+        public typealias Check = (Data) -> Byte
+        
+        case crc
+        
+        public var check: Check {
+            switch self {
+            case .crc:
+                return {
+                    var c: Byte = 0
+                    for (i, n) in $0.enumerated() {
+                        i == 0 ? (c = Byte(n)) : (c ^= Byte(n))
+                    }
+                    return c
+                }
             }
         }
-        return c
     }
 }
