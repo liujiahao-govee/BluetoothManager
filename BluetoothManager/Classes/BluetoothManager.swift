@@ -81,6 +81,11 @@ public extension BluetoothManager {
     /// 连接外设
     func connect(device: BluetoothDeviceProtocol, options: [String: Any]? = nil) {
         guard let underlyingDevice = device.underlyingDevice else { return }
+        
+        if underlyingDevice.peripheral.state == .connected || underlyingDevice.peripheral.state == .connecting {
+            return
+        }
+        
         underlyingDevice.services = device.services
         underlyingDevice.characteristics = device.characteristics
         underlyingDevice.notifyCharacteristics = device.notifyCharacteristics
@@ -91,8 +96,13 @@ public extension BluetoothManager {
     
     /// 断连外设
     func disconnnect(device: BluetoothDeviceProtocol) {
-        guard let device = device.underlyingDevice else { return }
-        centralManager.cancelPeripheralConnection(device.peripheral)
+        guard let underlyingDevice = device.underlyingDevice else { return }
+        
+        if underlyingDevice.peripheral.state == .disconnected || underlyingDevice.peripheral.state == .disconnecting {
+            return
+        }
+        
+        centralManager.cancelPeripheralConnection(underlyingDevice.peripheral)
     }
     
     /// 断开全部连接
@@ -105,12 +115,12 @@ public extension BluetoothManager {
     ///   - tuple: (外设, 特征, 数据)
     ///   - type: 写入类型
     func writeData(_ tuple: WriteableDataTuple, type: CBCharacteristicWriteType = .withoutResponse) {
-        guard let device = tuple.device.underlyingDevice else { return }
+        guard let underlyingDevice = tuple.device.underlyingDevice, underlyingDevice.peripheral.state == .connected else { return }
         let uuid = tuple.characteristic
         let data = tuple.data
-        guard let char = device.getDisCoveredCharacteristic(uuid) else { return }
+        guard let char = underlyingDevice.getDisCoveredCharacteristic(uuid) else { return }
         
-        device.peripheral.writeValue(data, for: char, type: type)
+        underlyingDevice.peripheral.writeValue(data, for: char, type: type)
     }
     
     /// 批量写入数据
@@ -123,18 +133,13 @@ public extension BluetoothManager {
     
     /// 读取设备信号强度
     func readRSSI(device: BluetoothDeviceProtocol) {
-        guard let underlyingDevice = device.underlyingDevice else { return }
+        guard let underlyingDevice = device.underlyingDevice, underlyingDevice.peripheral.state == .connected else { return }
         underlyingDevice.peripheral.readRSSI()
     }
     
     /// 批量读取设备信号强度
     func readRSSI(devices: [BluetoothDeviceProtocol]) {
         devices.forEach { self.readRSSI(device: $0) }
-    }
-    
-    /// 查看设备是否已连接
-    func getDeviceIsConnected(_ device: BluetoothDeviceModel) -> Bool {
-        connectedDevices.contains(device)
     }
 }
 

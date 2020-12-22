@@ -44,13 +44,13 @@ private extension Heartbeat {
     
     @objc func beat() {
         let tuples: [WriteableDataTuple] = devices.compactMap { (device) -> WriteableDataTuple? in
-            guard let data = device.heartbeatData else {
+            guard device.underlyingDevice?.peripheral.state == .connected,
+                  let data = device.heartbeatData else {
                 return nil
             }
             return WriteableDataTuple(device, device.uuidTuple.write, data)
         }
         
         manager?.writeDatas(tuples)
-        manager?.readRSSI(devices: devices)
     }
 }

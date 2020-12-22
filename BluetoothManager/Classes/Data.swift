@@ -7,7 +7,24 @@
 
 import Foundation
 
+/// 字节
 public typealias Byte = UInt8
+
+extension Byte {
+    
+    /// 高低4位字节
+    /// - Parameters:
+    ///   - high: 高4位字节
+    ///   - low: 低4位字节
+    /// - Returns: 字节
+    static public func four(high: Byte, low: Byte) -> Byte {
+        var byte: Byte = 0
+        byte ^= (high << 4)
+        byte ^= low
+        print(String(byte, radix: 2, uppercase: true))
+        return byte
+    }
+}
 
 extension Data {
     
@@ -36,24 +53,31 @@ extension Data {
         let temp = prefix(lenght - 1)
         return rule.check(temp) == self.last
     }
+}
+
+extension Data {
     
-    /// 校验规则
-    public enum CheckRule {
-        
-        public typealias Check = (Data) -> Byte
-        
-        case crc
-        
-        public var check: Check {
-            switch self {
-            case .crc:
-                return {
-                    var c: Byte = 0
-                    for (i, n) in $0.enumerated() {
-                        i == 0 ? (c = Byte(n)) : (c ^= Byte(n))
-                    }
-                    return c
+    public var debugDescription: String {
+        NSData(data: self).debugDescription
+    }
+}
+
+/// 校验规则
+public enum CheckRule {
+    
+    public typealias Check = (Data) -> Byte
+    
+    case crc
+    
+    public var check: Check {
+        switch self {
+        case .crc:
+            return {
+                var c: Byte = 0
+                for (i, n) in $0.enumerated() {
+                    i == 0 ? (c = Byte(n)) : (c ^= Byte(n))
                 }
+                return c
             }
         }
     }
