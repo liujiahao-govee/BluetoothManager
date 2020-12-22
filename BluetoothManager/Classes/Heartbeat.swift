@@ -11,32 +11,55 @@ import CoreBluetooth
 public final class Heartbeat {
     
     public weak var manager: BluetoothManager?
-    
-    private var timer: Timer?
+            
+    private lazy var sourceTimer: DispatchSourceTimer = {
+        let timer = DispatchSource.makeTimerSource(flags: .strict, queue: .global())
+        timer.schedule(deadline: .now(), repeating: timeInterval)
+        timer.setEventHandler { [weak self] in
+            self?.beat()
+        }
+        return timer
+    }()
     
     private let timeInterval: TimeInterval = 2
     
-    var devices: [BluetoothDeviceProtocol]
+    public var devices: [BluetoothDeviceProtocol]
+    
+    public private(set) var isSuspended: Bool = true
     
     public init(_ manager: BluetoothManager, devices: [BluetoothDeviceProtocol]) {
         self.manager = manager
         self.devices = devices
     }
+    
+    deinit {
+        cancel()
+    }
 }
 
 public extension Heartbeat {
     
-    func fire() {
-        self.timer?.invalidate()
-        let timer = Timer(timeInterval: timeInterval, target: self, selector: #selector(beat), userInfo: nil, repeats: true)
-        RunLoop.current.add(timer, forMode: .common)
-        timer.fire()
-        self.timer = timer
+    func resume() {
+        if isSuspended {
+            sourceTimer.resume()
+        }
+        isSuspended = false
     }
     
-    func done() {
-        self.timer?.invalidate()
-        self.timer = nil
+    func suspend() {
+        if isSuspended {
+            return
+        }
+        isSuspended = true
+        sourceTimer.suspend()
+    }
+    
+    func cancel() {
+        if sourceTimer.isCancelled {
+            return
+        }
+        resume()// if timer isSuspended then crash!
+        sourceTimer.cancel()
     }
 }
 

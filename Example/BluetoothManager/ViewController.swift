@@ -104,7 +104,7 @@ extension ViewController: BluetoothManagerDelegate {
         connectedDevice = device
         
         hearbeat = Heartbeat(bluetoothManager, devices: [device])
-        hearbeat!.fire()
+        hearbeat!.resume()
     }
     
     func didUpdateValue(device: BluetoothDeviceModel, characteristic: String, data: Data) {
